@@ -1,12 +1,8 @@
 package com.sev4ikwasd.pgpmessengerserver.config.filter;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sev4ikwasd.pgpmessengerserver.config.service.JwtService;
 import com.sev4ikwasd.pgpmessengerserver.database.dao.UserDAO;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
-import org.springframework.messaging.support.MessageHeaderAccessor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
@@ -18,10 +14,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 public class JwtTokenFilter extends OncePerRequestFilter {
     @Autowired
@@ -49,8 +42,6 @@ public class JwtTokenFilter extends OncePerRequestFilter {
                 }
             });
         });
-
-        //final StompHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(request.getReader().lines().collect(Collectors.joining(System.lineSeparator())), StompHeaderAccessor.class);
 
         filterChain.doFilter(request, response);
     }
