@@ -21,7 +21,7 @@ public class UserApp {
     private String email;
     @Column(name = "password")
     private String password;
-    @OneToMany(mappedBy = "user")
+    @OneToMany(mappedBy = "user", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     private Set<Message> messages;
 
     public UserApp(String username, String email, String password){
