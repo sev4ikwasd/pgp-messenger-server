@@ -23,7 +23,7 @@ public class MessengerController {
 
     @MessageMapping("/input/{client}")
     public void sendMessage(@RequestBody MessageInputParam message, @DestinationVariable("client") String client, @AuthenticationPrincipal UserApp user) {
-        Message res = new Message(message.getMessage(), client, user);
-        this.template.convertAndSend("/output", new MessageOutputParam(res.getMessage(), res.getUser().getId(), res.getSentTime()));
+        Message res = new Message(message.getMessage(), user.getId(), client);
+        this.template.convertAndSend("/output/" + client, new MessageOutputParam(res.getMessage(), user.getId(), res.getSentTime()));
     }
 }

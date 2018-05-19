@@ -21,8 +21,12 @@ public class UserApp {
     private String email;
     @Column(name = "password")
     private String password;
-    @OneToMany(mappedBy = "user", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-    private Set<Message> messages;
+    /*@Column(name = "sent_messages_id")
+    private Set<String> sentMessagesId;
+    @Column(name = "receive_messages_id")
+    private Set<String> receivedMessagesId*/
+    /*@OneToMany(mappedBy = "user", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    private Set<Message> messages;*/
 
     public UserApp(String username, String email, String password){
         this.id = UUID.randomUUID().toString();
