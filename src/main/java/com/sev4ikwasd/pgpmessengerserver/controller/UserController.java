@@ -2,15 +2,19 @@ package com.sev4ikwasd.pgpmessengerserver.controller;
 
 import com.sev4ikwasd.pgpmessengerserver.config.service.JwtService;
 import com.sev4ikwasd.pgpmessengerserver.controller.model.RegisterParam;
+import com.sev4ikwasd.pgpmessengerserver.controller.model.UserInfoParam;
+import com.sev4ikwasd.pgpmessengerserver.controller.model.UserWithToken;
 import com.sev4ikwasd.pgpmessengerserver.database.dao.UserDAO;
 import com.sev4ikwasd.pgpmessengerserver.controller.exception.InvalidRequestException;
 import com.sev4ikwasd.pgpmessengerserver.database.model.UserApp;
 import com.sev4ikwasd.pgpmessengerserver.controller.model.LoginParam;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
@@ -57,20 +61,28 @@ public class UserController {
         if (bindingResult.hasErrors()) {
             throw new InvalidRequestException(bindingResult);
         }
-        UserApp user = userDAO.findUserByEmail(loginParam.getEmail());
+        UserApp user = null;
+        if(userDAO.existsByEmail(loginParam.getLogin())){
+            user = userDAO.findUserByEmail(loginParam.getLogin());
+        }
+        else if(userDAO.existsByUsername(loginParam.getLogin())){
+            user = userDAO.findUserByUsername(loginParam.getLogin());
+        }
         if (user != null && bCryptPasswordEncoder.matches(loginParam.getPassword(), user.getPassword())){
-            TokenString token = new TokenString();
-            token.setToken(jwtService.toToken(user));
+            UserWithToken token = new UserWithToken(jwtService.toToken(user), user.getEmail(), user.getUsername());
+            //token.setToken(jwtService.toToken(user));
             return new ResponseEntity<>(token, HttpStatus.OK);
         }
         else {
-            bindingResult.rejectValue("password", "INVALID", "Email or password is invalid");
+            bindingResult.rejectValue("password", "INVALID", "Login or password is invalid");
             throw new InvalidRequestException(bindingResult);
         }
     }
 
-    @Data
-    private class TokenString {
-        private String token;
+    @GetMapping("users/info")
+    public ResponseEntity info(@AuthenticationPrincipal String username){
+        UserApp user = userDAO.findUserByUsername(username);
+        UserInfoParam userInfo = new UserInfoParam(user.getUsername(), user.getEmail());
+        return new ResponseEntity<>(userInfo, HttpStatus.OK);
     }
 }

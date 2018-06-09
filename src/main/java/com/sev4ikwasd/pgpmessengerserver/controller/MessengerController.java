@@ -1,9 +1,12 @@
 package com.sev4ikwasd.pgpmessengerserver.controller;
 
+import com.sev4ikwasd.pgpmessengerserver.controller.exception.InvalidRequestException;
 import com.sev4ikwasd.pgpmessengerserver.controller.model.MessageInputParam;
 import com.sev4ikwasd.pgpmessengerserver.controller.model.MessageOutputParam;
-import com.sev4ikwasd.pgpmessengerserver.database.model.Message;
+import com.sev4ikwasd.pgpmessengerserver.database.dao.UserDAO;
+import com.sev4ikwasd.pgpmessengerserver.pojo.model.Message;
 import com.sev4ikwasd.pgpmessengerserver.database.model.UserApp;
+import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
@@ -15,15 +18,23 @@ import org.springframework.web.bind.annotation.RequestBody;
 @Controller
 public class MessengerController {
     private final SimpMessagingTemplate template;
+    private UserDAO userDAO;
+    private Logger logger;
 
     @Autowired
-    public MessengerController(SimpMessagingTemplate template){
+    public MessengerController(SimpMessagingTemplate template, UserDAO userDAO, Logger logger){
         this.template = template;
+        this.userDAO = userDAO;
+        this.logger = logger;
     }
 
-    @MessageMapping("/input/{client}")
-    public void sendMessage(@RequestBody MessageInputParam message, @DestinationVariable("client") String client, @AuthenticationPrincipal UserApp user) {
-        Message res = new Message(message.getMessage(), user.getId(), client);
-        this.template.convertAndSend("/output/" + client, new MessageOutputParam(res.getMessage(), user.getId(), res.getSentTime()));
+    @MessageMapping("/input/{username}")
+    public void sendMessage(@RequestBody MessageInputParam message, @DestinationVariable("username") String username, @AuthenticationPrincipal String senderUsername) {
+        if(userDAO.existsByUsername(username)) {
+            UserApp sender = userDAO.findUserByUsername(senderUsername);
+            UserApp receiver = userDAO.findUserByUsername(username);
+            Message res = new Message(message.getMessage(), sender.getUsername(), receiver.getUsername());
+            this.template.convertAndSendToUser(username, "/output", new MessageOutputParam(res.getMessage(), sender.getUsername(), res.getSentTime()));
+        }
     }
 }

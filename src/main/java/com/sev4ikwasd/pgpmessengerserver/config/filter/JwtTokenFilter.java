@@ -44,7 +44,7 @@ public class JwtTokenFilter extends OncePerRequestFilter {
             if (SecurityContextHolder.getContext().getAuthentication() == null) {
                 userDAO.findById(id).ifPresent(user -> {
                     UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
-                            user,
+                            user.getUsername(),
                             null,
                             Collections.emptyList()
                     );

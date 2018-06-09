@@ -1,7 +1,5 @@
 package com.sev4ikwasd.pgpmessengerserver.config;
 
-import com.sev4ikwasd.pgpmessengerserver.config.service.JwtService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
