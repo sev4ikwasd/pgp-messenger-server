@@ -1,15 +1,13 @@
 package com.sev4ikwasd.pgpmessengerserver.controller;
 
 import com.sev4ikwasd.pgpmessengerserver.config.service.JwtService;
+import com.sev4ikwasd.pgpmessengerserver.controller.exception.InvalidRequestException;
+import com.sev4ikwasd.pgpmessengerserver.controller.model.LoginParam;
 import com.sev4ikwasd.pgpmessengerserver.controller.model.RegisterParam;
 import com.sev4ikwasd.pgpmessengerserver.controller.model.UserInfoParam;
 import com.sev4ikwasd.pgpmessengerserver.controller.model.UserWithToken;
 import com.sev4ikwasd.pgpmessengerserver.database.dao.UserDAO;
-import com.sev4ikwasd.pgpmessengerserver.controller.exception.InvalidRequestException;
 import com.sev4ikwasd.pgpmessengerserver.database.model.UserApp;
-import com.sev4ikwasd.pgpmessengerserver.controller.model.LoginParam;
-import lombok.AllArgsConstructor;
-import lombok.Data;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -17,7 +15,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
 

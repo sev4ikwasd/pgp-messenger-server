@@ -1,12 +1,10 @@
 package com.sev4ikwasd.pgpmessengerserver.controller;
 
-import com.sev4ikwasd.pgpmessengerserver.controller.exception.InvalidRequestException;
 import com.sev4ikwasd.pgpmessengerserver.controller.model.MessageInputParam;
 import com.sev4ikwasd.pgpmessengerserver.controller.model.MessageOutputParam;
 import com.sev4ikwasd.pgpmessengerserver.database.dao.UserDAO;
-import com.sev4ikwasd.pgpmessengerserver.pojo.model.Message;
 import com.sev4ikwasd.pgpmessengerserver.database.model.UserApp;
-import org.slf4j.Logger;
+import com.sev4ikwasd.pgpmessengerserver.pojo.model.Message;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
@@ -19,13 +17,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 public class MessengerController {
     private final SimpMessagingTemplate template;
     private UserDAO userDAO;
-    private Logger logger;
 
     @Autowired
-    public MessengerController(SimpMessagingTemplate template, UserDAO userDAO, Logger logger){
+    public MessengerController(SimpMessagingTemplate template, UserDAO userDAO){
         this.template = template;
         this.userDAO = userDAO;
-        this.logger = logger;
     }
 
     @MessageMapping("/input/{username}")
