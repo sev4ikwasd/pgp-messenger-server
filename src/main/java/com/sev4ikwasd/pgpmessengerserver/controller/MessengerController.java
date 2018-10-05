@@ -10,6 +10,7 @@ import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
 
@@ -26,11 +27,9 @@ public class MessengerController {
 
     @MessageMapping("/input/{username}")
     public void sendMessage(@RequestBody MessageInputParam message, @DestinationVariable("username") String username, @AuthenticationPrincipal String senderUsername) {
-        if(userDAO.existsByUsername(username)) {
-            UserApp sender = userDAO.findUserByUsername(senderUsername);
-            UserApp receiver = userDAO.findUserByUsername(username);
-            Message res = new Message(message.getMessage(), sender.getUsername(), receiver.getUsername());
-            this.template.convertAndSendToUser(username, "/output", new MessageOutputParam(res.getMessage(), sender.getUsername(), res.getSentTime()));
-        }
+        UserApp sender = userDAO.findUserByUsername(senderUsername).orElseThrow(() -> new UsernameNotFoundException("Sender username not found"));
+        UserApp receiver = userDAO.findUserByUsername(username).orElseThrow(() -> new UsernameNotFoundException("Receiver username not found"));
+        Message res = new Message(message.getMessage(), sender.getUsername(), receiver.getUsername());
+        this.template.convertAndSendToUser(username, "/output", new MessageOutputParam(res.getMessage(), sender.getUsername(), res.getSentTime()));
     }
 }

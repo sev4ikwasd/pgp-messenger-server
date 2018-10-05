@@ -1,6 +1,5 @@
-package com.sev4ikwasd.pgpmessengerserver.config.service;
+package com.sev4ikwasd.pgpmessengerserver.config.service.user;
 
-import com.sev4ikwasd.pgpmessengerserver.database.dao.UserDAO;
 import com.sev4ikwasd.pgpmessengerserver.database.model.UserApp;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.User;
@@ -13,19 +12,16 @@ import static java.util.Collections.emptyList;
 
 @Service
 public class UserDetailsServiceImpl implements UserDetailsService {
-    private UserDAO userDAO;
+    private DatabaseUserService userService;
 
     @Autowired
-    public UserDetailsServiceImpl(UserDAO userDAO) {
-        this.userDAO = userDAO;
+    public UserDetailsServiceImpl(DatabaseUserService userService) {
+        this.userService = userService;
     }
 
     @Override
-    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        UserApp userApp = userDAO.findUserByEmail(email);
-        if (userApp == null) {
-            throw new UsernameNotFoundException(email);
-        }
-        return new User(userApp.getEmail(), userApp.getPassword(), emptyList());
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        UserApp userApp = userService.findUserByUsername(username).orElseThrow(() -> new UsernameNotFoundException(username));
+        return new User(userApp.getUsername(), userApp.getPassword(), emptyList());
     }
 }

@@ -1,18 +1,16 @@
 package com.sev4ikwasd.pgpmessengerserver.controller;
 
-import com.sev4ikwasd.pgpmessengerserver.config.service.JwtService;
-import com.sev4ikwasd.pgpmessengerserver.controller.exception.InvalidRequestException;
-import com.sev4ikwasd.pgpmessengerserver.controller.model.LoginParam;
+import com.sev4ikwasd.pgpmessengerserver.config.service.user.UserService;
 import com.sev4ikwasd.pgpmessengerserver.controller.model.RegisterParam;
 import com.sev4ikwasd.pgpmessengerserver.controller.model.UserInfoParam;
-import com.sev4ikwasd.pgpmessengerserver.controller.model.UserWithToken;
 import com.sev4ikwasd.pgpmessengerserver.database.dao.UserDAO;
 import com.sev4ikwasd.pgpmessengerserver.database.model.UserApp;
-import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -24,40 +22,40 @@ import javax.validation.Valid;
 
 @RestController
 public class UserController {
+    private UserService userService;
     private UserDAO userDAO;
     private BCryptPasswordEncoder bCryptPasswordEncoder;
-    private JwtService jwtService;
-    private Logger logger;
+    //private JwtService jwtService;
 
     @Autowired
-    public UserController(UserDAO userDAO, BCryptPasswordEncoder bCryptPasswordEncoder, JwtService jwtService, Logger logger) {
+    public UserController(UserService userService, UserDAO userDAO, BCryptPasswordEncoder bCryptPasswordEncoder/*, JwtService jwtService*/) {
+        this.userService = userService;
         this.userDAO = userDAO;
         this.bCryptPasswordEncoder = bCryptPasswordEncoder;
-        this.jwtService = jwtService;
-        this.logger = logger;
+        //this.jwtService = jwtService;
     }
 
-    @PostMapping("/users/register")
+    @PostMapping("/auth/register")
     public ResponseEntity register(@RequestBody @Valid RegisterParam registerParam, BindingResult bindingResult){
         if (bindingResult.hasErrors()) {
-            throw new InvalidRequestException(bindingResult);
+            throw new BadCredentialsException("Invalid data");
         }
-        if (userDAO.existsByUsername(registerParam.getUsername())) {
-            bindingResult.rejectValue("username", "DUPLICATED", "Username is duplicated");
+        if (userService.existsByUsername(registerParam.getUsername())) {
+            throw new BadCredentialsException("Username is already used");
         }
-        if (userDAO.existsByEmail(registerParam.getEmail())) {
-            bindingResult.rejectValue("email", "DUPLICATED", "Email is duplicated");
+        if (userService.existsByEmail(registerParam.getEmail())) {
+            throw new BadCredentialsException("Email is already used");
         }
-        if (bindingResult.hasErrors()) {
-            throw new InvalidRequestException(bindingResult);
-        }
+        //if (bindingResult.hasErrors()) {
+        //    throw new InvalidRequestException(bindingResult);
+        //}
         UserApp user = new UserApp(registerParam.getUsername(), registerParam.getEmail(), registerParam.getPassword());
         user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
         userDAO.save(user);
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
-    @PostMapping("/users/login")
+    /*@PostMapping("/users/login")
     public ResponseEntity login(@RequestBody @Valid LoginParam loginParam, BindingResult bindingResult){
         if (bindingResult.hasErrors()) {
             throw new InvalidRequestException(bindingResult);
@@ -78,11 +76,11 @@ public class UserController {
             bindingResult.rejectValue("password", "INVALID", "Login or password is invalid");
             throw new InvalidRequestException(bindingResult);
         }
-    }
+    }*/
 
     @GetMapping("users/info")
     public ResponseEntity info(@AuthenticationPrincipal String username){
-        UserApp user = userDAO.findUserByUsername(username);
+        UserApp user = userService.findUserByUsername(username).orElseThrow(() -> new UsernameNotFoundException("Username not found"));
         UserInfoParam userInfo = new UserInfoParam(user.getUsername(), user.getEmail());
         return new ResponseEntity<>(userInfo, HttpStatus.OK);
     }

@@ -14,7 +14,7 @@ import javax.validation.constraints.NotBlank;
 @JsonTypeName(value = "user")
 @JsonTypeInfo(include = JsonTypeInfo.As.WRAPPER_OBJECT, use = JsonTypeInfo.Id.NAME)
 public class LoginParam {
-    @NotBlank(message = "Can't be empty")
+    @NotBlank(message = "Login can't be empty")
     private String login;
     @NotBlank(message = "Password can't be empty")
     private String password;
